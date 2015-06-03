@@ -1,16 +1,19 @@
 LESS = $(wildcard src/*.less)
 DIST_CSS = $(LESS:src/%.less=dist/%.css)
 
-SRC = $(wildcard src/*.js src/*.jsx)
-DIST_JS = $(SRC:src/%.js=dist/%.js)
-DIST_JSX = $(SRC:src/%.jsx=dist/%.js)
-
 HTML = $(wildcard src/*.html)
 DIST_HTML = $(HTML:src/%.html=dist/%.html)
 
-GOSRC = src/main.go
+SOURCE = src/main.jsx
+TARGET = dist/main.js
+FLAGS = -t babelify --debug
 
+GOSRC = src/main.go
 GOBIN = bin/main
+
+WATCHIFY = ./node_modules/.bin/watchify
+BROWSERIFY = ./node_modules/.bin/browserify
+NPM = npm
 
 .PHONY: clean bin dist vendor
 
@@ -20,15 +23,17 @@ build: bin dist vendor
 
 bin: bin/main
 
-dist: $(DIST_JS) $(DIST_JSX) $(DIST_CSS) $(DIST_HTML)
+dist: $(TARGET) $(DIST_CSS) $(DIST_HTML)
 
-dist/%.js: src/%.js
+$(TARGET): $(SOURCE) node_modules
 	@mkdir -p $(@D)
-	@babel $< -o $@
+	$(BROWSERIFY) $(FLAGS) -o $@ -- $<
 
-dist/%.js: src/%.jsx
-	@mkdir -p $(@D)
-	@babel $< -o $@
+watch:
+	$(WATCHIFY) --verbose $(FLAGS) -o $(TARGET) -- $(SOURCE)
+
+node_modules:
+	$(NPM) install
 
 dist/%.css: src/%.less
 	@mkdir -p $(@D)
