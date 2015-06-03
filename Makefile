@@ -35,5 +35,4 @@ $(GOBIN): $(GOSRC)
 	@go build -o $@ $<
 
 clean:
-	@rm -f $(DIST_JS) $(DIST_CSS) $(GOBIN)
-	@rmdir bin/ dist/
+	@rm -rf bin/ dist/
