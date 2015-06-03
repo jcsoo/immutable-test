@@ -1,0 +1,23 @@
+{
+  "name": "immutable-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "babelify": "^6.1.2",
+    "browserify": "^10.2.3",
+    "less": "^2.5.1",
+    "watchify": "^3.2.1"
+  },
+  "devDependencies": {
+    "babelify": "^6.1.2",
+    "browserify": "^10.2.3",
+    "less": "^2.5.1",
+    "watchify": "^3.2.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

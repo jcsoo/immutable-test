@@ -17,7 +17,7 @@ WATCHIFY = ./node_modules/.bin/watchify
 BROWSERIFY = ./node_modules/.bin/browserify
 NPM = npm
 
-.PHONY: clean bin dist vendor
+.PHONY: clean bin dist vendor watch watchify watchman
 
 all: build
 
@@ -31,8 +31,12 @@ $(TARGET): $(SOURCE) node_modules
 	@mkdir -p $(@D)
 	$(BROWSERIFY) $(BROWSERIFY_FLAGS) -o $@ -- $<
 
-watch:
+watchify:
 	$(WATCHIFY) --verbose $(BROWSERIFY_FLAGS) -o $(TARGET) -- $(SOURCE)
+
+watchman:
+	watchman watch $(shell pwd)
+	watchman -- trigger $(shell pwd) remake '*.jsx' '*.js' '*.less' -- make
 
 node_modules:
 	$(NPM) install
