@@ -59,7 +59,10 @@ dist/%.html: src/%.html
 $(GOBIN): $(GOSRC)
 	@go build -o $@ $<
 
-lib: node_modules
+lib: dist/lib.js
+
+dist/lib.js: node_modules
+	@mkdir -p $(@D)
 	@$(BROWSERIFY) $(LIB_FLAGS) -o dist/lib.js
 
 vendor:
