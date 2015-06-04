@@ -7,7 +7,8 @@ DIST_HTML = $(HTML:src/%.html=dist/%.html)
 
 SOURCE = $(wildcard src/*.jsx) $(wildcard src/*.js)
 TARGET = dist/main.js
-BROWSERIFY_FLAGS = -t babelify --debug
+BROWSERIFY_FLAGS = -t babelify -x immutable -x blackbird -x xhr-promise --debug
+LIB_FLAGS = -r immutable -r blackbird -r xhr-promise
 
 GOSRC = src/main.go
 GOBIN = bin/main
@@ -16,12 +17,15 @@ LESSC = ./node_modules/.bin/lessc
 WATCHIFY = ./node_modules/.bin/watchify
 BROWSERIFY = ./node_modules/.bin/browserify
 NPM = npm
+NPM_FLAGS = 
 
-.PHONY: clean bin dist gulp vendor run watch watchify watchman
+LIB = immutable blackbird
+
+.PHONY: clean bin dist gulp lib vendor run watch watchify watchman
 
 all: build
 
-build: bin dist vendor
+build: bin dist lib vendor
 
 bin: bin/main
 
@@ -42,7 +46,7 @@ watchify:
 	$(WATCHIFY) --verbose $(BROWSERIFY_FLAGS) -o $(TARGET) -- $(SOURCE)
 
 node_modules:
-	$(NPM) install
+	@$(NPM) $(NPM_FLAGS) install
 
 dist/%.css: src/%.less
 	@mkdir -p $(@D)
@@ -55,11 +59,17 @@ dist/%.html: src/%.html
 $(GOBIN): $(GOSRC)
 	@go build -o $@ $<
 
+lib: node_modules
+	@$(BROWSERIFY) $(LIB_FLAGS) -o dist/lib.js
+
 vendor:
 	@rsync -aq vendor/ dist/
 
 clean:
 	@rm -rf bin/ dist/
+
+reallyclean: clean
+	@rm -rf node_modules/
 
 run: build
 	@bin/main

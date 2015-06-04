@@ -5,8 +5,11 @@
   "main": "index.js",
   "devDependencies": {
     "babelify": "^6.1.2",
+    "blackbird": "0.0.3",
     "browserify": "^10.2.3",
-    "less": "^2.5.1"
+    "immutable": "^3.7.3",
+    "less": "^2.5.1",
+    "xhr-promise": "^1.1.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
