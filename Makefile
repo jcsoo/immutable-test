@@ -1,3 +1,5 @@
+IMAGE=immutable-test
+
 LESS = $(wildcard src/*.less)
 DIST_CSS = $(LESS:src/%.less=dist/%.css)
 LESSC_FLAGS = --source-map-map-inline
@@ -18,10 +20,10 @@ WATCHIFY = ./node_modules/.bin/watchify
 BROWSERIFY = ./node_modules/.bin/browserify
 NPM = npm
 NPM_FLAGS = 
-
 LIB = immutable blackbird
 
-.PHONY: clean bin dist gulp lib vendor run watch watchify watchman
+.PHONY: clean bin dist gulp lib vendor run watch watchify watchman go-builder node-builder bin-image dist-image vendor-image image run-image
+
 
 all: build
 
@@ -57,6 +59,7 @@ dist/%.html: src/%.html
 	@rsync -aq $< $@
 
 $(GOBIN): $(GOSRC)
+	@go get github.com/julienschmidt/httprouter
 	@go build -o $@ $<
 
 lib: dist/lib.js
@@ -76,3 +79,27 @@ reallyclean: clean
 
 run: build
 	@bin/main
+
+go-builder:
+	docker build -t go-builder -f docker/go-builder.docker .
+
+node-builder:
+	docker build -t node-builder -f docker/node-builder.docker .
+
+bin-image: go-builder
+	@mkdir -p $(@D)
+	docker run --rm -it -v $(PWD):/go go-builder make bin
+
+dist-image: node-builder
+	@mkdir -p $(@D)
+	docker run --rm -it -v $(PWD):/src node-builder make dist
+
+vendor-image: vendor
+	@mkdir -p $(@D)
+
+image: vendor-image dist-image bin-image
+	docker build -t $(IMAGE) -f docker/Dockerfile .
+
+run-image: image
+	docker run --rm -it -p 5000:5000 $(IMAGE)
+
