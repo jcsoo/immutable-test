@@ -5,7 +5,7 @@ LESSC_FLAGS = --source-map-map-inline
 HTML = $(wildcard src/*.html)
 DIST_HTML = $(HTML:src/%.html=dist/%.html)
 
-SOURCE = src/main.jsx
+SOURCE = $(wildcard src/*.jsx) $(wildcard src/*.js)
 TARGET = dist/main.js
 BROWSERIFY_FLAGS = -t babelify --debug
 
@@ -17,7 +17,7 @@ WATCHIFY = ./node_modules/.bin/watchify
 BROWSERIFY = ./node_modules/.bin/browserify
 NPM = npm
 
-.PHONY: clean bin dist vendor watch watchify watchman
+.PHONY: clean bin dist gulp vendor run watch watchify watchman
 
 all: build
 
@@ -27,23 +27,26 @@ bin: bin/main
 
 dist: $(TARGET) $(DIST_CSS) $(DIST_HTML)
 
+gulp:
+	@gulp
+
 $(TARGET): $(SOURCE) node_modules
 	@mkdir -p $(@D)
-	$(BROWSERIFY) $(BROWSERIFY_FLAGS) -o $@ -- $<
+	@$(BROWSERIFY) $(BROWSERIFY_FLAGS) -o $@.tmp -- $<
+	@mv $@.tmp $@
+
+watch:
+	@fswatch src | xargs -n1 -I {} make dist
 
 watchify:
 	$(WATCHIFY) --verbose $(BROWSERIFY_FLAGS) -o $(TARGET) -- $(SOURCE)
-
-watchman:
-	watchman watch $(shell pwd)
-	watchman -- trigger $(shell pwd) remake '*.jsx' '*.js' '*.less' -- make
 
 node_modules:
 	$(NPM) install
 
 dist/%.css: src/%.less
 	@mkdir -p $(@D)
-	$(LESSC) $(LESSC_FLAGS) $< $@
+	@$(LESSC) $(LESSC_FLAGS) $< $@
 
 dist/%.html: src/%.html
 	@mkdir -p $(@D)
@@ -57,3 +60,6 @@ vendor:
 
 clean:
 	@rm -rf bin/ dist/
+
+run: build
+	@bin/main

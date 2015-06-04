@@ -1,3 +1,3 @@
 /* ABC.js */
 
-export var Test = 'ABC def';
+export var Test = 'Hello';

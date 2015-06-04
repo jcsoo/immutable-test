@@ -13,26 +13,36 @@ gulp.task('less', function () {
         .pipe(gulp.dest('dist'))
 });
 
-gulp.task('js', function () {
-  var bundler = watchify(browserify('src/main.jsx',
-    {
-      cache: {},
-      packageCache: {},
-      debug: true,
-    }
-  ));
-  bundler.transform(babelify);
-  bundler.on('update', rebundle)
+function bundle(bundler) {
+  bundler
+  	 .transform(babelify)
+	 .bundle()
+    .pipe(source('main.js'))
+    .pipe(gulp.dest('dist'));
+}
+
+gulp.task('js-watch', function() {
+  console.log('js-watch')
+  var bundler = watchify(browserify('src/main.jsx', {
+	 cache: {},
+	 packageCache: {},
+	 debug: true,
+  }));
   bundler.on('log', function(msg) {
     console.log(msg);
   });
+  bundler.on('update', function() {
+	 bundle(bundler);
+  });
+  bundle(bundler);
+});
 
-  function rebundle() {
-    return bundler.bundle()
-      .pipe(source('main.js'))
-      .pipe(gulp.dest('dist'));
-  }
-  rebundle(bundler);
+
+gulp.task('js', function () {
+  var bundler = browserify('src/main.jsx', {
+    debug: true,
+  });
+  bundle(bundler);
 });
 
 gulp.task('html', function() {
@@ -40,7 +50,7 @@ gulp.task('html', function() {
   .pipe(gulp.dest('dist'))
 })
 
-gulp.task('watch', ['js'], function() {
+gulp.task('watch', ['js-watch'], function() {
     gulp.watch(['src/*.less'],  ['less']);
     gulp.watch('src/*.html', ['html']);
 });

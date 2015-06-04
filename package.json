@@ -12,7 +12,10 @@
   "devDependencies": {
     "babelify": "^6.1.2",
     "browserify": "^10.2.3",
+    "gulp": "^3.9.0",
+    "gulp-less": "^3.0.3",
     "less": "^2.5.1",
+    "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.2.1"
   },
   "scripts": {
