@@ -36,7 +36,7 @@ $(TARGET): $(SOURCE) node_modules
 	@mv $@.tmp $@
 
 watch:
-	@fswatch src | xargs -n1 -I {} make dist
+	@fswatch src | xargs -n1 -I {} sh -c 'make dist && afplay /System/Library/Sounds/Pop.aiff || afplay /System/Library/Sounds/Basso.aiff'
 
 watchify:
 	$(WATCHIFY) --verbose $(BROWSERIFY_FLAGS) -o $(TARGET) -- $(SOURCE)
