@@ -120,9 +120,8 @@ go-image: vendor-image dist-image bin-image
 	docker build -t $(IMAGE) -f docker/go.docker .
 
 node-image: node-builder
-	docker run --rm -it -v $(PWD):/src node-builder make node_modules
-	docker run --rm -it -v $(PWD):/src node-builder make dist
+	docker run --rm -it -v $(PWD):/src node-builder make node_modules dist
 	docker build -t $(IMAGE) -f docker/node.docker .
 
-run-image: image
+run-image: 
 	docker run --rm -it -p 5000:5000 $(IMAGE)
