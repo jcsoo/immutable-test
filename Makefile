@@ -1,24 +1,20 @@
 IMAGE=immutable-test
 
-CSS_SRC = $(wildcard src/client/*.less)
+CSS_SRC = $(shell find src/client -type f -name '*.less')
 CSS = $(CSS_SRC:src/%.less=dist/%.css)
-LESSC_FLAGS = --source-map-map-inline
 
-HTML_SRC = $(wildcard src/server/html/*.html)
+HTML_SRC = $(shell find src/server/html -type f -name '*.html')
 HTML = $(HTML_SRC:src/%.html=dist/%.html)
 
-CLIENT_SRC = $(wildcard src/client/*.jsx) $(wildcard src/client/*.js)
+CLIENT_SRC = $(shell find src/client -type f -name '*.jsx' -or -name '*.js')
 CLIENT = dist/client/main.js
-CLIENT_BROWSERIFY_FLAGS = -t babelify -x immutable -x blackbird -x xhr-promise --debug
-LIB_FLAGS = -r immutable -r blackbird -r xhr-promise
 
-SERVER_SRC = $(wildcard src/server/*.jsx) $(wildcard src/server/*.js)
+SERVER_SRC = $(shell find src/server -type f -name '*.jsx' -or -name '*.js')
 SERVER = dist/server/main.js
-SERVER_BROWSERIFY_FLAGS =
 
-COMMON_JSX = $(wildcard src/common/*.jsx)
-COMMON_JS = $(wildcard src/common/*.js)
-COMMON = $(COMMON_JS:src/%.js=dist/%.js) $(COMMON_JSX:src/%.jsx=dist/%.js)
+
+COMMON_SRC = $(shell find src/common -type f -name '*.jsx' -or -name '*.js')
+COMMON = $(COMMON_SRC:src/%.js=dist/%.js) $(COMMON_SRC:src/%.jsx=dist/%.js)
 
 GOSRC = src/main.go
 GOBIN = bin/main
@@ -27,9 +23,14 @@ LESSC = ./node_modules/.bin/lessc
 WATCHIFY = ./node_modules/.bin/watchify
 BROWSERIFY = ./node_modules/.bin/browserify
 BABEL = ./node_modules/.bin/babel
+NODEMON = ./node_modules/.bin/nodemon
 NPM = npm
+
+LESSC_FLAGS = --source-map-map-inline
 NPM_FLAGS =
-LIB = immutable blackbird
+LIB_FLAGS = -r immutable -r blackbird -r xhr-promise
+CLIENT_BROWSERIFY_FLAGS = -t babelify --extension=.jsx -x immutable -x blackbird -x xhr-promise --debug
+SERVER_BROWSERIFY_FLAGS =
 
 .PHONY: clean bin dist gulp lib vendor run watch watchify watchman go-builder node-builder bin-image dist-image vendor-image image run-image
 
@@ -40,11 +41,15 @@ build: dist lib vendor
 
 bin: bin/main
 
-dist: $(SERVER) $(CLIENT) $(COMMON) $(CSS) $(HTML)
+dist: server client
 
-$(CLIENT): $(CLIENT_SRC) node_modules
+server: $(SERVER) $(COMMON)
+
+client: $(CLIENT) $(CSS) $(HTML)
+
+$(CLIENT): $(CLIENT_SRC) $(COMMON)
 	@mkdir -p $(@D)
-	@$(BROWSERIFY) $(CLIENT_BROWSERIFY_FLAGS) -o $@.tmp -- $<
+	$(BROWSERIFY) $(CLIENT_BROWSERIFY_FLAGS) -o $@.tmp -- $<
 	@mv $@.tmp $@
 
 watch:
@@ -89,7 +94,7 @@ reallyclean: clean
 	@rm -rf node_modules/
 
 run: dist
-	node dist/server/main.js
+	$(NODEMON) --watch dist/server --watch dist/common dist/server/main.js
 
 run-go: dist bin
 	@bin/main

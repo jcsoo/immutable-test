@@ -3,8 +3,8 @@
 import Promise from 'blackbird'
 import Immutable from 'immutable';
 import XHR from 'xhr-promise';
-import { Test } from './abc';
-import { Model } from '../common/model.js';
+import { Hello } from '../common/components/hello';
+import { Model } from '../common/model';
 
 window.addEventListener('load', function() {
   var m = Immutable.Map({a:1, b:2});
@@ -12,6 +12,6 @@ window.addEventListener('load', function() {
   var xhr = new XHR();
     xhr.send({url: '/'}).then(function(r) {
   });
-  var t = new Model('Thing');
-  React.render(<div><h1>Hello There, {m.get('a')}</h1>{t.getName()}</div>, document.body);
+  var t = new Model('Thing');  
+  React.render(<Hello model={t}/>, document.body);
 });

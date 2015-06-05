@@ -3,7 +3,6 @@ export class Model {
     this.name = name;
   }
   getName() {
-    return this.name+'?';
+    return this.name;
   }
-
 }
