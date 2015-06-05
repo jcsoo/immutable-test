@@ -56,7 +56,7 @@ $(CLIENT): $(CLIENT_SRC) $(COMMON) node_modules
 watch:
 	@fswatch src | xargs -n1 -I {} sh -c 'make dist && afplay /System/Library/Sounds/Pop.aiff || afplay /System/Library/Sounds/Basso.aiff'
 
-node_modules:
+node_modules: package.json
 	$(NPM) $(NPM_FLAGS) install
 
 dist/%.js: src/%.js $(BABEL)
