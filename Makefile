@@ -1,14 +1,14 @@
 IMAGE=immutable-test
 
-LESS = $(wildcard src/*.less)
+LESS = $(wildcard src/client/*.less)
 DIST_CSS = $(LESS:src/%.less=dist/%.css)
 LESSC_FLAGS = --source-map-map-inline
 
-HTML = $(wildcard src/*.html)
+HTML = $(wildcard src/client/*.html)
 DIST_HTML = $(HTML:src/%.html=dist/%.html)
 
-SOURCE = $(wildcard src/*.jsx) $(wildcard src/*.js)
-TARGET = dist/main.js
+SOURCE = $(wildcard src/client/*.jsx) $(wildcard src/client/*.js)
+TARGET = dist/client/main.js
 BROWSERIFY_FLAGS = -t babelify -x immutable -x blackbird -x xhr-promise --debug
 LIB_FLAGS = -r immutable -r blackbird -r xhr-promise
 
@@ -19,7 +19,7 @@ LESSC = ./node_modules/.bin/lessc
 WATCHIFY = ./node_modules/.bin/watchify
 BROWSERIFY = ./node_modules/.bin/browserify
 NPM = npm
-NPM_FLAGS = 
+NPM_FLAGS =
 LIB = immutable blackbird
 
 .PHONY: clean bin dist gulp lib vendor run watch watchify watchman go-builder node-builder bin-image dist-image vendor-image image run-image
@@ -66,10 +66,10 @@ lib: dist/lib.js
 
 dist/lib.js: node_modules
 	@mkdir -p $(@D)
-	@$(BROWSERIFY) $(LIB_FLAGS) -o dist/lib.js
+	@$(BROWSERIFY) $(LIB_FLAGS) -o dist/client/lib.js
 
 vendor:
-	@rsync -aq vendor/ dist/
+	@rsync -aq vendor/ dist/client/
 
 clean:
 	@rm -rf bin/ dist/
@@ -102,4 +102,3 @@ image: vendor-image dist-image bin-image
 
 run-image: image
 	docker run --rm -it -p 5000:5000 $(IMAGE)
-
