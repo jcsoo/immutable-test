@@ -95,7 +95,7 @@ reallyclean: clean
 	@rm -rf node_modules/
 
 run: dist
-	$(NODEMON) --watch dist/server --watch dist/common dist/server/main.js
+	cd dist && $(NODEMON) --watch server --watch common server/main.js
 
 run-go: dist bin
 	@bin/main
