@@ -32,8 +32,7 @@ LIB_FLAGS = -r immutable -r blackbird -r xhr-promise
 CLIENT_BROWSERIFY_FLAGS = -t babelify --extension=.jsx -x immutable -x blackbird -x xhr-promise --debug
 SERVER_BROWSERIFY_FLAGS =
 
-.PHONY: clean bin dist gulp lib vendor run watch watchify watchman go-builder node-builder bin-image dist-image vendor-image image run-image
-
+.PHONY: clean reallyclean node-modules bin dist gulp lib vendor run watch watchify watchman go-builder node-builder bin-image dist-image vendor-image image run-image
 
 all: build
 
@@ -41,9 +40,9 @@ build: dist lib vendor
 
 bin: bin/main
 
-dist: server client
+dist: server client 
 
-server: $(SERVER) $(COMMON)
+server: $(SERVER) $(COMMON) 
 
 client: $(CLIENT) $(CSS) $(HTML)
 
@@ -56,7 +55,7 @@ watch:
 	@fswatch src | xargs -n1 -I {} sh -c 'make dist && afplay /System/Library/Sounds/Pop.aiff || afplay /System/Library/Sounds/Basso.aiff'
 
 node_modules:
-	@$(NPM) $(NPM_FLAGS) install
+	$(NPM) $(NPM_FLAGS) install
 
 dist/%.js: src/%.js
 	@mkdir -p $(@D)
@@ -116,8 +115,11 @@ dist-image: node-builder
 vendor-image: vendor
 	@mkdir -p $(@D)
 
-image: vendor-image dist-image bin-image
-	docker build -t $(IMAGE) -f docker/Dockerfile .
+go-image: vendor-image dist-image bin-image
+	docker build -t $(IMAGE) -f docker/go.docker .
+
+node-image: dist-image
+	docker build -t $(IMAGE) -f docker/node.docker .
 
 run-image: image
 	docker run --rm -it -p 5000:5000 $(IMAGE)

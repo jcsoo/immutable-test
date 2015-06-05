@@ -1,0 +1,6 @@
+FROM node
+
+EXPOSE 5000
+RUN mkdir /app/
+ADD ./dist/ /app/
+CMD ["node", "/app/server/main.js"]
