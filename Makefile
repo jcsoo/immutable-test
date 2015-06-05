@@ -1,7 +1,7 @@
 IMAGE=immutable-test
 
 CSS_SRC = $(wildcard src/client/*.less)
-CSS = $(LESS:src/%.less=dist/%.css)
+CSS = $(CSS_SRC:src/%.less=dist/%.css)
 LESSC_FLAGS = --source-map-map-inline
 
 HTML_SRC = $(wildcard src/server/html/*.html)
@@ -42,9 +42,6 @@ bin: bin/main
 
 dist: $(SERVER) $(CLIENT) $(COMMON) $(CSS) $(HTML)
 
-gulp:
-	@gulp
-
 $(CLIENT): $(CLIENT_SRC) node_modules
 	@mkdir -p $(@D)
 	@$(BROWSERIFY) $(CLIENT_BROWSERIFY_FLAGS) -o $@.tmp -- $<
@@ -66,7 +63,7 @@ dist/%.js: src/%.jsx
 
 dist/%.css: src/%.less
 	@mkdir -p $(@D)
-	@$(LESSC) $(LESSC_FLAGS) $< $@
+	$(LESSC) $(LESSC_FLAGS) $< $@
 
 dist/%.html: src/%.html
 	@mkdir -p $(@D)

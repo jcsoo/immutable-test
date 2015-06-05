@@ -5,11 +5,10 @@ var app = express();
 import {Model} from '../common/model';
 
 app.get('/', function(req, res) {
-  var m = new Model('Thing');
-  var msg = <h1>Hello, World!</h1>;
-  res.send(React.renderToString(msg));
+  res.sendFile('index.html', {root: __dirname+'/html/'});
 });
 
+app.use(express.static(__dirname+'/../client/'));
 
 var server = app.listen(5000, function () {
   var host = server.address().host || '';
