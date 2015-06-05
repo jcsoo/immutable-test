@@ -1,11 +1,11 @@
 IMAGE=immutable-test
 
-LESS = $(wildcard src/client/*.less)
-DIST_CSS = $(LESS:src/%.less=dist/%.css)
+CSS_SRC = $(wildcard src/client/*.less)
+CSS = $(LESS:src/%.less=dist/%.css)
 LESSC_FLAGS = --source-map-map-inline
 
-HTML = $(wildcard src/client/*.html)
-DIST_HTML = $(HTML:src/%.html=dist/%.html)
+HTML_SRC = $(wildcard src/server/html/*.html)
+HTML = $(HTML_SRC:src/%.html=dist/%.html)
 
 CLIENT_SRC = $(wildcard src/client/*.jsx) $(wildcard src/client/*.js)
 CLIENT = dist/client/main.js
@@ -16,8 +16,9 @@ SERVER_SRC = $(wildcard src/server/*.jsx) $(wildcard src/server/*.js)
 SERVER = dist/server/main.js
 SERVER_BROWSERIFY_FLAGS =
 
-COMMON_SRC = $(wildcard src/common/*.jsx) $(wildcard src/common/*.js)
-COMMON = $(COMMON_SRC:src/common/%=dist/common/%)
+COMMON_JSX = $(wildcard src/common/*.jsx)
+COMMON_JS = $(wildcard src/common/*.js)
+COMMON = $(COMMON_JS:src/%.js=dist/%.js) $(COMMON_JSX:src/%.jsx=dist/%.js)
 
 GOSRC = src/main.go
 GOBIN = bin/main
@@ -35,11 +36,11 @@ LIB = immutable blackbird
 
 all: build
 
-build: bin dist lib vendor
+build: dist lib vendor
 
 bin: bin/main
 
-dist: $(SERVER) $(CLIENT) $(COMMON) $(DIST_CSS) $(DIST_HTML)
+dist: $(SERVER) $(CLIENT) $(COMMON) $(CSS) $(HTML)
 
 gulp:
 	@gulp
@@ -49,23 +50,19 @@ $(CLIENT): $(CLIENT_SRC) node_modules
 	@$(BROWSERIFY) $(CLIENT_BROWSERIFY_FLAGS) -o $@.tmp -- $<
 	@mv $@.tmp $@
 
-$(SERVER): $(SERVER_SRC) node_modules
-	@mkdir -p $(@D)
-	$(BABEL) -o $@ $<
-
 watch:
 	@fswatch src | xargs -n1 -I {} sh -c 'make dist && afplay /System/Library/Sounds/Pop.aiff || afplay /System/Library/Sounds/Basso.aiff'
-
-watchify:
-	$(WATCHIFY) --verbose $(BROWSERIFY_FLAGS) -o $(TARGET) -- $(SOURCE)
 
 node_modules:
 	@$(NPM) $(NPM_FLAGS) install
 
-$(COMMON): $(COMMON_SRC)
+dist/%.js: src/%.js
 	@mkdir -p $(@D)
-	$(BABEL) -o $@ $<
+	$(BABEL) -o $@ $?
 
+dist/%.js: src/%.jsx
+	@mkdir -p $(@D)
+	$(BABEL) -o $@ $?
 
 dist/%.css: src/%.less
 	@mkdir -p $(@D)
