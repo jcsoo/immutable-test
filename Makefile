@@ -38,11 +38,15 @@ all: dist
 
 bin: bin/main
 
-dist: server client lib vendor
+dist: server client lib vendor dist/package.json
 
 server: $(SERVER) $(COMMON)
 
 client: $(CLIENT) $(CSS) $(HTML)
+
+dist/package.json: package.json
+	@cp $< $@
+	cd dist && $(NPM) install --production
 
 $(CLIENT): $(CLIENT_SRC) $(COMMON)
 	@mkdir -p $(@D)
@@ -108,7 +112,6 @@ bin-image: go-builder
 
 dist-image: node-builder
 	@mkdir -p $(@D)
-	docker run --rm -it -v $(PWD):/src node-builder make dist
 
 vendor-image: vendor
 	@mkdir -p $(@D)
@@ -116,7 +119,9 @@ vendor-image: vendor
 go-image: vendor-image dist-image bin-image
 	docker build -t $(IMAGE) -f docker/go.docker .
 
-node-image: dist-image
+node-image: node-builder
+	docker run --rm -it -v $(PWD):/src node-builder make node_modules
+	docker run --rm -it -v $(PWD):/src node-builder make dist
 	docker build -t $(IMAGE) -f docker/node.docker .
 
 run-image: image
