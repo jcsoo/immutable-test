@@ -4,6 +4,7 @@
   "description": "Sample project",
   "main": "index.js",
   "devDependencies": {
+    "babel": "^5.5.3",
     "babelify": "^6.1.2",
     "blackbird": "0.0.3",
     "browserify": "^10.2.3",

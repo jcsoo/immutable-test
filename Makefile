@@ -7,10 +7,17 @@ LESSC_FLAGS = --source-map-map-inline
 HTML = $(wildcard src/client/*.html)
 DIST_HTML = $(HTML:src/%.html=dist/%.html)
 
-SOURCE = $(wildcard src/client/*.jsx) $(wildcard src/client/*.js)
-TARGET = dist/client/main.js
-BROWSERIFY_FLAGS = -t babelify -x immutable -x blackbird -x xhr-promise --debug
+CLIENT_SRC = $(wildcard src/client/*.jsx) $(wildcard src/client/*.js)
+CLIENT = dist/client/main.js
+CLIENT_BROWSERIFY_FLAGS = -t babelify -x immutable -x blackbird -x xhr-promise --debug
 LIB_FLAGS = -r immutable -r blackbird -r xhr-promise
+
+SERVER_SRC = $(wildcard src/server/*.jsx) $(wildcard src/server/*.js)
+SERVER = dist/server/main.js
+SERVER_BROWSERIFY_FLAGS =
+
+COMMON_SRC = $(wildcard src/common/*.jsx) $(wildcard src/common/*.js)
+COMMON = $(COMMON_SRC:src/common/%=dist/common/%)
 
 GOSRC = src/main.go
 GOBIN = bin/main
@@ -18,6 +25,7 @@ GOBIN = bin/main
 LESSC = ./node_modules/.bin/lessc
 WATCHIFY = ./node_modules/.bin/watchify
 BROWSERIFY = ./node_modules/.bin/browserify
+BABEL = ./node_modules/.bin/babel
 NPM = npm
 NPM_FLAGS =
 LIB = immutable blackbird
@@ -31,15 +39,19 @@ build: bin dist lib vendor
 
 bin: bin/main
 
-dist: $(TARGET) $(DIST_CSS) $(DIST_HTML)
+dist: $(SERVER) $(CLIENT) $(COMMON) $(DIST_CSS) $(DIST_HTML)
 
 gulp:
 	@gulp
 
-$(TARGET): $(SOURCE) node_modules
+$(CLIENT): $(CLIENT_SRC) node_modules
 	@mkdir -p $(@D)
-	@$(BROWSERIFY) $(BROWSERIFY_FLAGS) -o $@.tmp -- $<
+	@$(BROWSERIFY) $(CLIENT_BROWSERIFY_FLAGS) -o $@.tmp -- $<
 	@mv $@.tmp $@
+
+$(SERVER): $(SERVER_SRC) node_modules
+	@mkdir -p $(@D)
+	$(BABEL) -o $@ $<
 
 watch:
 	@fswatch src | xargs -n1 -I {} sh -c 'make dist && afplay /System/Library/Sounds/Pop.aiff || afplay /System/Library/Sounds/Basso.aiff'
@@ -49,6 +61,11 @@ watchify:
 
 node_modules:
 	@$(NPM) $(NPM_FLAGS) install
+
+$(COMMON): $(COMMON_SRC)
+	@mkdir -p $(@D)
+	$(BABEL) -o $@ $<
+
 
 dist/%.css: src/%.less
 	@mkdir -p $(@D)
@@ -77,7 +94,10 @@ clean:
 reallyclean: clean
 	@rm -rf node_modules/
 
-run: build
+run: dist
+	node dist/server/main.js
+
+run-go: dist bin
 	@bin/main
 
 go-builder:
