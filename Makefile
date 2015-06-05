@@ -61,11 +61,11 @@ node_modules:
 
 dist/%.js: src/%.js $(BABEL)
 	@mkdir -p $(@D)
-	$(BABEL) -o $@ $?
+	$(BABEL) -o $@ $<
 
 dist/%.js: src/%.jsx $(BABEL)
 	@mkdir -p $(@D)
-	$(BABEL) -o $@ $?
+	$(BABEL) -o $@ $<
 
 dist/%.css: src/%.less  $(LESSC)
 	@mkdir -p $(@D)
@@ -100,7 +100,6 @@ run: dist
 run-go: dist bin
 	@bin/main
 
-
 $(LESSC) $(WATCHIFY) $(BROWSERIFY) $(BABEL) $(NODEMON): node_modules
 
 go-builder:
@@ -126,5 +125,5 @@ node-image: node-builder
 	docker run --rm -it -v $(PWD):/src node-builder make node_modules dist
 	docker build -t $(IMAGE) -f docker/node.docker .
 
-run-image: 
+run-image:
 	docker run --rm -it -p 5000:5000 $(IMAGE)
