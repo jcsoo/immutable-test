@@ -34,15 +34,13 @@ SERVER_BROWSERIFY_FLAGS =
 
 .PHONY: clean reallyclean node-modules bin dist gulp lib vendor run watch watchify watchman go-builder node-builder bin-image dist-image vendor-image image run-image
 
-all: build
-
-build: dist lib vendor
+all: dist
 
 bin: bin/main
 
-dist: server client 
+dist: server client lib vendor
 
-server: $(SERVER) $(COMMON) 
+server: $(SERVER) $(COMMON)
 
 client: $(CLIENT) $(CSS) $(HTML)
 
