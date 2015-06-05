@@ -48,7 +48,7 @@ dist/package.json: package.json
 	@cp $< $@
 	cd dist && $(NPM) install --production
 
-$(CLIENT): $(CLIENT_SRC) $(COMMON)
+$(CLIENT): $(CLIENT_SRC) $(COMMON) node_modules
 	@mkdir -p $(@D)
 	$(BROWSERIFY) $(CLIENT_BROWSERIFY_FLAGS) -o $@.tmp -- $<
 	@mv $@.tmp $@
@@ -59,15 +59,15 @@ watch:
 node_modules:
 	$(NPM) $(NPM_FLAGS) install
 
-dist/%.js: src/%.js
+dist/%.js: src/%.js $(BABEL)
 	@mkdir -p $(@D)
 	$(BABEL) -o $@ $?
 
-dist/%.js: src/%.jsx
+dist/%.js: src/%.jsx $(BABEL)
 	@mkdir -p $(@D)
 	$(BABEL) -o $@ $?
 
-dist/%.css: src/%.less
+dist/%.css: src/%.less  $(LESSC)
 	@mkdir -p $(@D)
 	$(LESSC) $(LESSC_FLAGS) $< $@
 
@@ -99,6 +99,9 @@ run: dist
 
 run-go: dist bin
 	@bin/main
+
+
+$(LESSC) $(WATCHIFY) $(BROWSERIFY) $(BABEL) $(NODEMON): node_modules
 
 go-builder:
 	docker build -t go-builder -f docker/go-builder.docker .
